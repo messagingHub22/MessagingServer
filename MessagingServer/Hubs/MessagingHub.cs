@@ -6,7 +6,7 @@ namespace MessagingServer.Hubs
     {
         public async Task ReloadMessage(string user)
         {
-            await Clients.All.SendAsync("ReloadMessage", user);
+            await Clients.All.SendAsync("ReloadMessageClient", user);
         }
     }
 }

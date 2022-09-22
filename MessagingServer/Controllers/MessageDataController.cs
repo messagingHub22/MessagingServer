@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace MessagingServer.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api")]
     public class MessageDataController : ControllerBase
     {
 
@@ -14,18 +14,20 @@ namespace MessagingServer.Controllers
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetMessageData")]
-        public IEnumerable<MessageData> Get()
+        [HttpGet("getMessages")]
+        public IEnumerable<MessageData> GetMessages()
         {
             return Enumerable.Range(1, 5).Select(index => new MessageData
             {
                 Date = DateTime.Now.AddDays(index),
                 Id = Random.Shared.Next(-20, 55),
                 Read = false,
-                Content = String.Concat("Message", index),
+                Content = String.Concat("Message ", index),
                 Flag = "Other"
             })
             .ToArray();
         }
+
+
     }
 }

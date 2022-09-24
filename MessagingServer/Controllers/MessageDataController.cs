@@ -23,7 +23,7 @@ namespace MessagingServer.Controllers
                 Id = Random.Shared.Next(-20, 55),
                 Read = false,
                 Content = String.Concat("Message ", index),
-                Flag = "Other"
+                MessageCategory = "Other"
             })
             .ToArray();
         }

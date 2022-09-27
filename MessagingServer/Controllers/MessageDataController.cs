@@ -19,11 +19,12 @@ namespace MessagingServer.Controllers
         {
             return Enumerable.Range(1, 5).Select(index => new MessageData
             {
-                Date = DateTime.Now.AddDays(index),
+                SentTime = DateTime.Now.AddDays(index),
                 Id = Random.Shared.Next(-20, 55),
                 Read = false,
                 Content = String.Concat("Message ", index),
-                MessageCategory = "Other"
+                MessageCategory = "Other",
+                User = "Person1"
             })
             .ToArray();
         }

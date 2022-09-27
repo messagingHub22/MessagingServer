@@ -3,7 +3,7 @@ namespace MessagingServer
     public class MessageData
     {
         // Time of sending the message
-        public DateTime Date { get; set; }
+        public DateTime SentTime { get; set; }
 
         // Unique id of message
         public int Id { get; set; }
@@ -16,5 +16,8 @@ namespace MessagingServer
 
         // Category of message is (Exports, SystemEvents, WorkTasks, Other etc.)
         public string? MessageCategory { get; set; }
+
+        // The user to which message is sent
+        public string? User { get; set; }
     }
 }

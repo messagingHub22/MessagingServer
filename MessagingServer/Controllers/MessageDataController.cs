@@ -21,10 +21,10 @@ namespace MessagingServer.Controllers
             {
                 SentTime = DateTime.Now.AddDays(index),
                 Id = Random.Shared.Next(-20, 55),
-                Read = false,
+                MessageRead = false,
                 Content = String.Concat("Message ", index),
                 MessageCategory = "Other",
-                User = "Person1"
+                MessageUser = "Person1"
             })
             .ToArray();
         }

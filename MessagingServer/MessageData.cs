@@ -9,7 +9,7 @@ namespace MessagingServer
         public int Id { get; set; }
 
         // Whether message is read
-        public bool Read { get; set; }
+        public bool MessageRead { get; set; }
 
         // The content of message
         public string? Content { get; set; }
@@ -18,6 +18,6 @@ namespace MessagingServer
         public string? MessageCategory { get; set; }
 
         // The user to which message is sent
-        public string? User { get; set; }
+        public string? MessageUser { get; set; }
     }
 }

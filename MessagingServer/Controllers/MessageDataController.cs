@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using MySql.Data.MySqlClient;
+using System.Collections.Generic;
 
 namespace MessagingServer.Controllers
 {
@@ -9,6 +11,8 @@ namespace MessagingServer.Controllers
 
         private readonly ILogger<MessageDataController> _logger;
 
+        private string ConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
         public MessageDataController(ILogger<MessageDataController> logger)
         {
             _logger = logger;
@@ -17,18 +21,34 @@ namespace MessagingServer.Controllers
         [HttpGet("getMessages")]
         public IEnumerable<MessageData> GetMessages()
         {
-            return Enumerable.Range(1, 5).Select(index => new MessageData
+            var messages = new List<MessageData>();
+
+            MySqlConnection connection = SqlConnection();
+            MySqlCommand command = new MySqlCommand("SELECT * FROM messages_server", connection);
+            connection.Open();
+
+            using (MySqlDataReader reader = command.ExecuteReader())
             {
-                SentTime = DateTime.Now.AddDays(index),
-                Id = Random.Shared.Next(-20, 55),
-                MessageRead = false,
-                Content = String.Concat("Message ", index),
-                MessageCategory = "Other",
-                MessageUser = "Person1"
-            })
-            .ToArray();
+                while (reader.Read())
+                {
+                    messages.Add(new MessageData()
+                    {
+                        Id = reader.GetInt32("Id"),
+                        SentTime = reader.GetDateTime("SentTime"),
+                        MessageRead = reader.GetInt16("MessageRead") == 1,
+                        Content = reader.GetString("Content"),
+                        MessageCategory = reader.GetString("MessageCategory"),
+                        MessageUser = reader.GetString("MessageUser")
+                    });
+                }
+            }
+
+            return messages;
         }
 
-
+        private MySqlConnection SqlConnection()
+        {
+            return new MySqlConnection(ConnectionString);
+        }
     }
 }

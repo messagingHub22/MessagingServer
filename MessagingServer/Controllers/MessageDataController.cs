@@ -11,6 +11,8 @@ namespace MessagingServer.Controllers
 
         private readonly ILogger<MessageDataController> _logger;
 
+        // The Environment variable for the connection string,
+        // It contains the server, user, password, database name to connect to sql server.
         private string ConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
         public MessageDataController(ILogger<MessageDataController> logger)
@@ -18,20 +20,21 @@ namespace MessagingServer.Controllers
             _logger = logger;
         }
 
+        // Get all the messages sent to all users from server
         [HttpGet("getMessages")]
         public IEnumerable<MessageData> GetMessages()
         {
-            var messages = new List<MessageData>();
+            var Messages = new List<MessageData>();
 
-            MySqlConnection connection = SqlConnection();
-            MySqlCommand command = new MySqlCommand("SELECT * FROM messages_server", connection);
-            connection.Open();
+            MySqlConnection Connection = SqlConnection();
+            MySqlCommand Command = new MySqlCommand("SELECT * FROM messages_server", Connection);
+            Connection.Open();
 
-            using (MySqlDataReader reader = command.ExecuteReader())
+            using (MySqlDataReader reader = Command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    messages.Add(new MessageData()
+                    Messages.Add(new MessageData()
                     {
                         Id = reader.GetInt32("Id"),
                         SentTime = reader.GetDateTime("SentTime"),
@@ -43,7 +46,30 @@ namespace MessagingServer.Controllers
                 }
             }
 
-            return messages;
+            Connection.Close();
+
+            return Messages;
+        }
+
+        // Send a message to a user from server
+        [HttpPost("sendMessage")]
+        public void SendMessage(String SentTime, String Content, String MessageCategory, String MessageUser)
+        {
+            MySqlConnection Connection = SqlConnection();
+            Connection.Open();
+
+            String Query = "INSERT INTO messages_server (SentTime, MessageRead, Content, MessageCategory, MessageUser) VALUES (@SentTime, @MessageRead, @Content, @MessageCategory, @MessageUser)";
+
+            MySqlCommand Command = new MySqlCommand(Query, Connection);
+            Command.Parameters.AddWithValue("@SentTime", SentTime);
+            Command.Parameters.AddWithValue("@MessageRead", 0);
+            Command.Parameters.AddWithValue("@Content", Content);
+            Command.Parameters.AddWithValue("@MessageCategory", MessageCategory);
+            Command.Parameters.AddWithValue("@MessageUser", MessageUser);
+
+            Command.ExecuteNonQuery();
+
+            Connection.Close();
         }
 
         private MySqlConnection SqlConnection()

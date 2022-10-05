@@ -72,6 +72,38 @@ namespace MessagingServer.Controllers
             Connection.Close();
         }
 
+        // Get the messages sent to a user from server
+        [HttpGet("getMessagesForUser")]
+        public IEnumerable<MessageData> GetMessagesForUser(String User)
+        {
+            var Messages = new List<MessageData>();
+
+            MySqlConnection Connection = SqlConnection();
+            MySqlCommand Command = new MySqlCommand("SELECT * FROM messages_server WHERE MessageUser='" + User + "'", Connection);
+            Connection.Open();
+
+            using (MySqlDataReader reader = Command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Messages.Add(new MessageData()
+                    {
+                        Id = reader.GetInt32("Id"),
+                        SentTime = reader.GetDateTime("SentTime"),
+                        MessageRead = reader.GetInt16("MessageRead") == 1,
+                        Content = reader.GetString("Content"),
+                        MessageCategory = reader.GetString("MessageCategory"),
+                        MessageUser = reader.GetString("MessageUser")
+                    });
+                }
+            }
+
+            Connection.Close();
+
+            return Messages;
+        }
+
+        // Object for MySqlConnection
         private MySqlConnection SqlConnection()
         {
             return new MySqlConnection(ConnectionString);

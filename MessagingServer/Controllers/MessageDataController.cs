@@ -103,6 +103,23 @@ namespace MessagingServer.Controllers
             return Messages;
         }
 
+        // Mark the message with the given Id as read
+        [HttpPost("markMessageRead")]
+        public void MarkMessageRead(string Id)
+        {
+            MySqlConnection Connection = SqlConnection();
+            Connection.Open();
+
+            String Query = "UPDATE messages_server SET MessageRead = 1 WHERE Id = @Id";
+
+            MySqlCommand Command = new MySqlCommand(Query, Connection);
+            Command.Parameters.AddWithValue("@Id", Id);
+
+            Command.ExecuteNonQuery();
+
+            Connection.Close();
+        }
+
         // Object for MySqlConnection
         private MySqlConnection SqlConnection()
         {

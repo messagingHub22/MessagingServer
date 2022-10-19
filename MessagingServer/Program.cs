@@ -28,7 +28,7 @@ app.UseAuthorization();
 
 app.UseCors(builder =>
 {
-    builder.WithOrigins("https://messagingclient.azurewebsites.net/") //Source
+    builder.WithOrigins(Environment.GetEnvironmentVariable("CLIENT_URL") ?? "") //Source
         .AllowAnyHeader()
         .WithMethods("GET", "POST")
         .AllowCredentials();

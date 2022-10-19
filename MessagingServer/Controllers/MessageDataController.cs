@@ -120,6 +120,17 @@ namespace MessagingServer.Controllers
             Connection.Close();
         }
 
+        // Send a message to a user from server
+        /*[HttpPost("sendMessageToGroups")]
+        public void SendMessageToGroups (String SentTime, String Content, String MessageCategory, String Group)
+        {
+            List<string> GroupMembers = new List<string>();
+
+            foreach (var Member in GroupMembers) { 
+                SendMessage(SentTime, Content, MessageCategory, Member);
+            }
+        }*/
+
         // Object for MySqlConnection
         private MySqlConnection SqlConnection()
         {

@@ -9,6 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors();
 builder.Services.AddSignalR();
 
 var app = builder.Build();
@@ -22,9 +23,27 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
 app.UseAuthorization();
 
+app.UseCors(builder =>
+{
+    builder.WithOrigins("https://messagingclient.azurewebsites.net/") //Source
+        .AllowAnyHeader()
+        .WithMethods("GET", "POST")
+        .AllowCredentials();
+
+    builder.WithOrigins("https://localhost:7032") //Source
+        .AllowAnyHeader()
+        .WithMethods("GET", "POST")
+        .AllowCredentials();
+});
+
 app.MapControllers();
-app.MapHub<MessagingHub>("/messagingHub");
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<MessagingHub>("/messagingHub");
+});
 
 app.Run();

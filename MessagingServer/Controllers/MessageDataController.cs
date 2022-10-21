@@ -27,7 +27,7 @@ namespace MessagingServer.Controllers
             var Messages = new List<MessageData>();
 
             MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand("SELECT * FROM messages_server", Connection);
+            MySqlCommand Command = new MySqlCommand("SELECT * FROM messages_server ORDER BY SentTime DESC", Connection);
             Connection.Open();
 
             using (MySqlDataReader reader = Command.ExecuteReader())
@@ -79,7 +79,7 @@ namespace MessagingServer.Controllers
             var Messages = new List<MessageData>();
 
             MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand("SELECT * FROM messages_server WHERE MessageUser='" + User + "'", Connection);
+            MySqlCommand Command = new MySqlCommand("SELECT * FROM messages_server WHERE MessageUser='" + User + "' ORDER BY SentTime DESC", Connection);
             Connection.Open();
 
             using (MySqlDataReader reader = Command.ExecuteReader())

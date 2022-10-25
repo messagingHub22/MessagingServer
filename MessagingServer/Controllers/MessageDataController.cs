@@ -122,9 +122,9 @@ namespace MessagingServer.Controllers
 
         // Get all the groups
         [HttpGet("getGroups")]
-        public IEnumerable<GroupData> GetGroups()
+        public IEnumerable<String> GetGroups()
         {
-            var Groups = new List<GroupData>();
+            var Groups = new List<String>();
 
             MySqlConnection Connection = SqlConnection();
             MySqlCommand Command = new MySqlCommand("SELECT DISTINCT GroupName FROM group_members", Connection);
@@ -134,12 +134,7 @@ namespace MessagingServer.Controllers
             {
                 while (reader.Read())
                 {
-                    Groups.Add(new GroupData()
-                    {
-                        Id = reader.GetInt32("Id"),
-                        GroupName = reader.GetString("GroupName"),
-                        MemberName = reader.GetString("MemberName")
-                    });
+                    Groups.Add(reader.GetString("GroupName"));
                 }
             }
 
@@ -166,12 +161,11 @@ namespace MessagingServer.Controllers
             Connection.Close();
         }
 
-
         // Get members from a group
         [HttpGet("getGroupMembers")]
-        public IEnumerable<GroupData> GetGroupMembers(String Group)
+        public IEnumerable<String> GetGroupMembers(String Group)
         {
-            var Groups = new List<GroupData>();
+            var GroupMembers = new List<String>();
 
             MySqlConnection Connection = SqlConnection();
             MySqlCommand Command = new MySqlCommand("SELECT DISTINCT MemberName FROM group_members WHERE GroupName='" + Group + "'", Connection);
@@ -181,18 +175,13 @@ namespace MessagingServer.Controllers
             {
                 while (reader.Read())
                 {
-                    Groups.Add(new GroupData()
-                    {
-                        Id = reader.GetInt32("Id"),
-                        GroupName = reader.GetString("GroupName"),
-                        MemberName = reader.GetString("MemberName")
-                    });
+                    GroupMembers.Add(reader.GetString("MemberName"));
                 }
             }
 
             Connection.Close();
 
-            return Groups;
+            return GroupMembers;
         }
 
         // Send a message to a user from server

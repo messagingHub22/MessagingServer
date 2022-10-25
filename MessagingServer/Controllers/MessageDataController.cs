@@ -1,6 +1,6 @@
+using MessagingServer.Data;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
-using System.Collections.Generic;
 
 namespace MessagingServer.Controllers
 {

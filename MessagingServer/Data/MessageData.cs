@@ -1,4 +1,4 @@
-namespace MessagingServer
+namespace MessagingServer.Data
 {
     public class MessageData
     {

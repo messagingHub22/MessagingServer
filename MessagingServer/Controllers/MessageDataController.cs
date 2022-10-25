@@ -148,6 +148,24 @@ namespace MessagingServer.Controllers
             return Groups;
         }
 
+        // Add member to a group
+        [HttpPost("addMemberToGroup")]
+        public void AddMemberToGroup(String GroupName, String MemberName)
+        {
+            MySqlConnection Connection = SqlConnection();
+            Connection.Open();
+
+            String Query = "INSERT INTO group_members (GroupName, MemberName) VALUES (@GroupName, @MemberName)";
+
+            MySqlCommand Command = new MySqlCommand(Query, Connection);
+            Command.Parameters.AddWithValue("@GroupName", GroupName);
+            Command.Parameters.AddWithValue("@MemberName", MemberName);
+
+            Command.ExecuteNonQuery();
+
+            Connection.Close();
+        }
+
         // Send a message to a user from server
         /*[HttpPost("sendMessageToGroups")]
         public void SendMessageToGroups (String SentTime, String Content, String MessageCategory, String Group)

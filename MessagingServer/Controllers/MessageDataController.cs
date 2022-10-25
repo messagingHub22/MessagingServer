@@ -166,6 +166,35 @@ namespace MessagingServer.Controllers
             Connection.Close();
         }
 
+
+        // Get members from a group
+        [HttpGet("getGroupMembers")]
+        public IEnumerable<GroupData> GetGroupMembers(String Group)
+        {
+            var Groups = new List<GroupData>();
+
+            MySqlConnection Connection = SqlConnection();
+            MySqlCommand Command = new MySqlCommand("SELECT DISTINCT MemberName FROM group_members WHERE GroupName='" + Group + "'", Connection);
+            Connection.Open();
+
+            using (MySqlDataReader reader = Command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Groups.Add(new GroupData()
+                    {
+                        Id = reader.GetInt32("Id"),
+                        GroupName = reader.GetString("GroupName"),
+                        MemberName = reader.GetString("MemberName")
+                    });
+                }
+            }
+
+            Connection.Close();
+
+            return Groups;
+        }
+
         // Send a message to a user from server
         /*[HttpPost("sendMessageToGroups")]
         public void SendMessageToGroups (String SentTime, String Content, String MessageCategory, String Group)

@@ -184,16 +184,17 @@ namespace MessagingServer.Controllers
             return GroupMembers;
         }
 
-        // Send a message to a user from server
-        /*[HttpPost("sendMessageToGroups")]
-        public void SendMessageToGroups (String SentTime, String Content, String MessageCategory, String Group)
+        // Send a message to all users in a group from server
+        [HttpPost("sendMessageToGroup")]
+        public void SendMessageToGroup(String SentTime, String Content, String MessageCategory, String MessageGroup)
         {
-            List<string> GroupMembers = new List<string>();
+            List<string> GroupMembers = (List<string>) GetGroupMembers(MessageGroup);
 
-            foreach (var Member in GroupMembers) { 
+            foreach (var Member in GroupMembers)
+            {
                 SendMessage(SentTime, Content, MessageCategory, Member);
             }
-        }*/
+        }
 
         // Object for MySqlConnection
         private MySqlConnection SqlConnection()

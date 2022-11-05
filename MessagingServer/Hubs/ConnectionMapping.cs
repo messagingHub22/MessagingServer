@@ -1,5 +1,7 @@
 ﻿namespace MessagingServer.Hubs
 {
+    // Source: https://learn.microsoft.com/en-us/aspnet/signalr/overview/guide-to-the-api/mapping-users-to-connections
+    // In-memory storage for mapping users to connection ids
     public class ConnectionMapping<T>
     {
         private readonly Dictionary<T, HashSet<string>> _connections =

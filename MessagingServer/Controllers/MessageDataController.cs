@@ -195,6 +195,26 @@ namespace MessagingServer.Controllers
                 SendMessage(SentTime, Content, MessageCategory, Member);
             }
         }
+        
+        // Send a message from a user to other user
+        [HttpPost("sendUserMessage")]
+        public void SendUserMessage(String SentTime, String Content, String MessageFrom, String MessageTo)
+        {
+            MySqlConnection Connection = SqlConnection();
+            Connection.Open();
+
+            String Query = "INSERT INTO messages_user (SentTime, Content, MessageFrom, MessageTo) VALUES (@SentTime, @Content, @MessageFrom, @MessageTo)";
+
+            MySqlCommand Command = new MySqlCommand(Query, Connection);
+            Command.Parameters.AddWithValue("@SentTime", SentTime);
+            Command.Parameters.AddWithValue("@Content", Content);
+            Command.Parameters.AddWithValue("@MessageFrom", MessageFrom);
+            Command.Parameters.AddWithValue("@MessageTo", MessageTo);
+
+            Command.ExecuteNonQuery();
+
+            Connection.Close();
+        }
 
         // Object for MySqlConnection
         private MySqlConnection SqlConnection()

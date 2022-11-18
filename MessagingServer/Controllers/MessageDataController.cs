@@ -215,7 +215,37 @@ namespace MessagingServer.Controllers
 
             Connection.Close();
         }
+ 
+        // Get all messages between from a user to other user
+        [HttpGet("getUserMessages")]
+        public IEnumerable<MessageUser> GetUserMessages(String MessageFrom, String MessageTo)
+        {
+            var Messages = new List<MessageUser>();
 
+            MySqlConnection Connection = SqlConnection();
+            MySqlCommand Command = new MySqlCommand("SELECT  * FROM messages_user a WHERE (a.MessageFrom = '"+MessageFrom+"' AND a.MessageTo = '"+MessageTo+"') OR (a.MessageFrom = '"+MessageTo+"' AND a.MessageTo = '"+MessageFrom+"') ORDER BY SentTime", Connection);
+            Connection.Open();
+
+            using (MySqlDataReader reader = Command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Messages.Add(new MessageUser()
+                    {
+                        Id = reader.GetInt32("Id"),
+                        SentTime = reader.GetDateTime("SentTime"),
+                        Content = reader.GetString("Content"),
+                        MessageFrom = reader.GetString("MessageFrom"),
+                        MessageTo = reader.GetString("MessageTo")
+                    });
+                }
+            }
+
+            Connection.Close();
+
+            return Messages;
+        }
+        
         // Object for MySqlConnection
         private MySqlConnection SqlConnection()
         {

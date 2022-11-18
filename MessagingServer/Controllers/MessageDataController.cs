@@ -246,6 +246,30 @@ namespace MessagingServer.Controllers
             return Messages;
         }
         
+        // Get all the users that a user has messaged or got messages from. 
+       [HttpGet("getMessagedUsers")]
+        public IEnumerable<String> GetMessagedUsers(String User)
+        {
+            var Messages = new List<String>();
+
+            MySqlConnection Connection = SqlConnection();
+            MySqlCommand Command = new MySqlCommand("SELECT DISTINCT UserName FROM (SELECT MessageTo AS 'UserName' FROM messages_user WHERE MessageFrom='"+User+"' UNION ALL SELECT MessageFrom AS 'UserName' FROM messages_user WHERE MessageTo='"+User+"') as M", Connection);
+            Connection.Open();
+
+            using (MySqlDataReader reader = Command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Messages.Add(reader.GetString("UserName"));
+                }
+            }
+            Messages.Sort();
+
+            Connection.Close();
+
+            return Messages;
+        }
+        
         // Object for MySqlConnection
         private MySqlConnection SqlConnection()
         {

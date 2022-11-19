@@ -30,11 +30,11 @@ namespace MessagingServer.Hubs
         }
 
         // Sends a call to the particular user who got new user to user message
-        public async Task ReloadUserMessageForUser(string user)
+        public async Task ReloadUserMessageForUser(string user, string from)
         {
             foreach (var connectionId in _userConnections.GetConnections(user))
             {
-                await Clients.Client(connectionId).SendAsync("ReloadClientUserMessage");
+                await Clients.Client(connectionId).SendAsync("ReloadClientUserMessage", from);
             }
         }
 

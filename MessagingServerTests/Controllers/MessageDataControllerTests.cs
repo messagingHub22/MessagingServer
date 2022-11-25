@@ -1,11 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MessagingServer.Controllers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MessagingServer.Data;
+using System.Data;
+using Moq;
 
 namespace MessagingServer.Controllers.Tests
 {
@@ -16,20 +12,34 @@ namespace MessagingServer.Controllers.Tests
         public void GetMessagesTest()
         {
             MessageDataController controller = new MessageDataController(null);
-            IEnumerable<MessageData> messages;
+            controller.SetCustomReader(MockMessageData());
 
-            // Task.Delay(5000).ContinueWith(t => Assert.Fail("Did not respond in 5 seconds. Database might be connecting."));
+            IEnumerable<MessageData> messages = controller.GetMessages();
 
-            try
-            {
-                messages = controller.GetMessages();
-            } catch
-            {
-                Assert.Fail("Failed to initialize database. Check connection string.");
-            }
-
+            Assert.IsNotNull(messages);
+            Assert.AreEqual(messages.ElementAt(0).Id, 0);
+            Assert.AreEqual(messages.ElementAt(0).MessageRead, false);
+            Assert.AreEqual(messages.ElementAt(0).Content, "A");
+            Assert.AreEqual(messages.ElementAt(0).MessageCategory, "B");
+            Assert.AreEqual(messages.ElementAt(0).MessageUser, "C");
         }
 
+        private IDataReader MockMessageData()
+        {
+            var moq = new Mock<IDataReader>();
 
+            moq.SetupSequence(m => m.Read())
+                .Returns(true)
+                .Returns(false);
+
+            moq.SetupGet<object>(x => x["Id"]).Returns((UInt32)0);
+            moq.SetupGet<object>(x => x["SentTime"]).Returns(DateTime.Now);
+            moq.SetupGet<object>(x => x["MessageRead"]).Returns((UInt64)0);
+            moq.SetupGet<object>(x => x["Content"]).Returns("A");
+            moq.SetupGet<object>(x => x["MessageCategory"]).Returns("B");
+            moq.SetupGet<object>(x => x["MessageUser"]).Returns("C");
+
+            return moq.Object;
+        }
     }
 }

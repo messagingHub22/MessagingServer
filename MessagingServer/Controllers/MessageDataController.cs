@@ -1,6 +1,7 @@
 using MessagingServer.Data;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
+using System.Data;
 
 namespace MessagingServer.Controllers
 {
@@ -13,7 +14,10 @@ namespace MessagingServer.Controllers
 
         // The Environment variable for the connection string,
         // It contains the server, user, password, database name to connect to sql server.
-        private string ConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+        private static string ConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
+        // To indicate the reader when tests are being run. Used for mock sql reader. Null when tests are not being run
+        private IDataReader testReader = null;
 
         public MessageDataController(ILogger<MessageDataController> logger)
         {
@@ -24,29 +28,31 @@ namespace MessagingServer.Controllers
         [HttpGet("getMessages")]
         public IEnumerable<MessageData> GetMessages()
         {
-            var Messages = new List<MessageData>();
+            IDataReader reader;
 
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand("SELECT * FROM messages_server ORDER BY SentTime DESC", Connection);
-            Connection.Open();
-
-            using (MySqlDataReader reader = Command.ExecuteReader())
+            if (testReader == null)
             {
-                while (reader.Read())
-                {
-                    Messages.Add(new MessageData()
-                    {
-                        Id = reader.GetInt32("Id"),
-                        SentTime = reader.GetDateTime("SentTime"),
-                        MessageRead = reader.GetInt16("MessageRead") == 1,
-                        Content = reader.GetString("Content"),
-                        MessageCategory = reader.GetString("MessageCategory"),
-                        MessageUser = reader.GetString("MessageUser")
-                    });
-                }
+                reader = MessageDataReader.GetMessages();
+            }
+            else
+            {
+                reader = testReader;
             }
 
-            Connection.Close();
+            var Messages = new List<MessageData>();
+
+            while (reader.Read())
+            {
+                Messages.Add(new MessageData()
+                {
+                    Id = (int)((UInt32)reader["Id"]),
+                    SentTime = (DateTime)reader["SentTime"],
+                    MessageRead = (UInt64)reader["MessageRead"] == 1,
+                    Content = (string)reader["Content"],
+                    MessageCategory = (string)reader["MessageCategory"],
+                    MessageUser = (string)reader["MessageUser"]
+                });
+            }
 
             return Messages;
         }
@@ -188,14 +194,14 @@ namespace MessagingServer.Controllers
         [HttpPost("sendMessageToGroup")]
         public void SendMessageToGroup(String SentTime, String Content, String MessageCategory, String MessageGroup)
         {
-            List<string> GroupMembers = (List<string>) GetGroupMembers(MessageGroup);
+            List<string> GroupMembers = (List<string>)GetGroupMembers(MessageGroup);
 
             foreach (var Member in GroupMembers)
             {
                 SendMessage(SentTime, Content, MessageCategory, Member);
             }
         }
-        
+
         // Send a message from a user to other user
         [HttpPost("sendUserMessage")]
         public void SendUserMessage(String SentTime, String Content, String MessageFrom, String MessageTo)
@@ -215,7 +221,7 @@ namespace MessagingServer.Controllers
 
             Connection.Close();
         }
- 
+
         // Get all messages between from a user to other user
         [HttpGet("getUserMessages")]
         public IEnumerable<MessageUser> GetUserMessages(String MessageFrom, String MessageTo)
@@ -223,7 +229,7 @@ namespace MessagingServer.Controllers
             var Messages = new List<MessageUser>();
 
             MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand("SELECT  * FROM messages_user a WHERE (a.MessageFrom = '"+MessageFrom+"' AND a.MessageTo = '"+MessageTo+"') OR (a.MessageFrom = '"+MessageTo+"' AND a.MessageTo = '"+MessageFrom+"') ORDER BY SentTime", Connection);
+            MySqlCommand Command = new MySqlCommand("SELECT  * FROM messages_user a WHERE (a.MessageFrom = '" + MessageFrom + "' AND a.MessageTo = '" + MessageTo + "') OR (a.MessageFrom = '" + MessageTo + "' AND a.MessageTo = '" + MessageFrom + "') ORDER BY SentTime", Connection);
             Connection.Open();
 
             using (MySqlDataReader reader = Command.ExecuteReader())
@@ -245,15 +251,15 @@ namespace MessagingServer.Controllers
 
             return Messages;
         }
-        
+
         // Get all the users that a user has messaged or got messages from. 
-       [HttpGet("getMessagedUsers")]
+        [HttpGet("getMessagedUsers")]
         public IEnumerable<String> GetMessagedUsers(String User)
         {
             var Messages = new List<String>();
 
             MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand("SELECT DISTINCT UserName FROM (SELECT MessageTo AS 'UserName' FROM messages_user WHERE MessageFrom='"+User+"' UNION ALL SELECT MessageFrom AS 'UserName' FROM messages_user WHERE MessageTo='"+User+"') as M", Connection);
+            MySqlCommand Command = new MySqlCommand("SELECT DISTINCT UserName FROM (SELECT MessageTo AS 'UserName' FROM messages_user WHERE MessageFrom='" + User + "' UNION ALL SELECT MessageFrom AS 'UserName' FROM messages_user WHERE MessageTo='" + User + "') as M", Connection);
             Connection.Open();
 
             using (MySqlDataReader reader = Command.ExecuteReader())
@@ -269,11 +275,18 @@ namespace MessagingServer.Controllers
 
             return Messages;
         }
-        
+
         // Object for MySqlConnection
-        private MySqlConnection SqlConnection()
+        public static MySqlConnection SqlConnection()
         {
             return new MySqlConnection(ConnectionString);
+        }
+
+        // Method used for testing. Do not call from web. HttpPost added to remove error
+        [HttpPost("doNotCallThis")]
+        public void SetCustomReader(IDataReader reader)
+        {
+            testReader = reader;
         }
     }
 }

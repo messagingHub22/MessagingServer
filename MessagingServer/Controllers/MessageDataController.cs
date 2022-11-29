@@ -17,7 +17,7 @@ namespace MessagingServer.Controllers
         private static string ConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
         // To indicate the reader when tests are being run. Used for mock sql reader. Null when tests are not being run
-        private IDataReader testReader = null;
+        private IDataReader TestReader = null;
 
         public MessageDataController(ILogger<MessageDataController> logger)
         {
@@ -28,31 +28,32 @@ namespace MessagingServer.Controllers
         [HttpGet("getMessages")]
         public IEnumerable<MessageData> GetMessages()
         {
-            IDataReader reader;
+            var Messages = new List<MessageData>();
 
-            if (testReader == null)
+            IDataReader Reader;
+            if (TestReader == null)
             {
-                reader = MessageDataReader.GetMessages();
+                Reader = MessageDataReader.GetMessages();
             }
             else
             {
-                reader = testReader;
+                Reader = TestReader;
             }
 
-            var Messages = new List<MessageData>();
-
-            while (reader.Read())
+            while (Reader.Read())
             {
                 Messages.Add(new MessageData()
                 {
-                    Id = (int)((UInt32)reader["Id"]),
-                    SentTime = (DateTime)reader["SentTime"],
-                    MessageRead = (UInt64)reader["MessageRead"] == 1,
-                    Content = (string)reader["Content"],
-                    MessageCategory = (string)reader["MessageCategory"],
-                    MessageUser = (string)reader["MessageUser"]
+                    Id = (int)((UInt32)Reader["Id"]),
+                    SentTime = (DateTime)Reader["SentTime"],
+                    MessageRead = (UInt64)Reader["MessageRead"] == 1,
+                    Content = (string)Reader["Content"],
+                    MessageCategory = (string)Reader["MessageCategory"],
+                    MessageUser = (string)Reader["MessageUser"]
                 });
             }
+
+            Reader.Close();
 
             return Messages;
         }
@@ -84,27 +85,30 @@ namespace MessagingServer.Controllers
         {
             var Messages = new List<MessageData>();
 
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand("SELECT * FROM messages_server WHERE MessageUser='" + User + "' ORDER BY SentTime DESC", Connection);
-            Connection.Open();
-
-            using (MySqlDataReader reader = Command.ExecuteReader())
+            IDataReader Reader;
+            if (TestReader == null)
             {
-                while (reader.Read())
-                {
-                    Messages.Add(new MessageData()
-                    {
-                        Id = reader.GetInt32("Id"),
-                        SentTime = reader.GetDateTime("SentTime"),
-                        MessageRead = reader.GetInt16("MessageRead") == 1,
-                        Content = reader.GetString("Content"),
-                        MessageCategory = reader.GetString("MessageCategory"),
-                        MessageUser = reader.GetString("MessageUser")
-                    });
-                }
+                Reader = MessageDataReader.GetMessagesForUser(User);
+            }
+            else
+            {
+                Reader = TestReader;
             }
 
-            Connection.Close();
+            while (Reader.Read())
+            {
+                Messages.Add(new MessageData()
+                {
+                    Id = (int)((UInt32)Reader["Id"]),
+                    SentTime = (DateTime)Reader["SentTime"],
+                    MessageRead = (UInt64)Reader["MessageRead"] == 1,
+                    Content = (string)Reader["Content"],
+                    MessageCategory = (string)Reader["MessageCategory"],
+                    MessageUser = (string)Reader["MessageUser"]
+                });
+            }
+
+            Reader.Close();
 
             return Messages;
         }
@@ -132,19 +136,22 @@ namespace MessagingServer.Controllers
         {
             var Groups = new List<String>();
 
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand("SELECT DISTINCT GroupName FROM group_members", Connection);
-            Connection.Open();
-
-            using (MySqlDataReader reader = Command.ExecuteReader())
+            IDataReader Reader;
+            if (TestReader == null)
             {
-                while (reader.Read())
-                {
-                    Groups.Add(reader.GetString("GroupName"));
-                }
+                Reader = MessageDataReader.GetGroups();
+            }
+            else
+            {
+                Reader = TestReader;
             }
 
-            Connection.Close();
+            while (Reader.Read())
+            {
+                Groups.Add((string)Reader["GroupName"]);
+            }
+
+            Reader.Close();
 
             return Groups;
         }
@@ -173,19 +180,22 @@ namespace MessagingServer.Controllers
         {
             var GroupMembers = new List<String>();
 
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand("SELECT DISTINCT MemberName FROM group_members WHERE GroupName='" + Group + "'", Connection);
-            Connection.Open();
-
-            using (MySqlDataReader reader = Command.ExecuteReader())
+            IDataReader Reader;
+            if (TestReader == null)
             {
-                while (reader.Read())
-                {
-                    GroupMembers.Add(reader.GetString("MemberName"));
-                }
+                Reader = MessageDataReader.GetGroupMembers(Group);
+            }
+            else
+            {
+                Reader = TestReader;
             }
 
-            Connection.Close();
+            while (Reader.Read())
+            {
+                GroupMembers.Add((string)Reader["MemberName"]);
+            }
+
+            Reader.Close();
 
             return GroupMembers;
         }
@@ -228,26 +238,29 @@ namespace MessagingServer.Controllers
         {
             var Messages = new List<MessageUser>();
 
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand("SELECT  * FROM messages_user a WHERE (a.MessageFrom = '" + MessageFrom + "' AND a.MessageTo = '" + MessageTo + "') OR (a.MessageFrom = '" + MessageTo + "' AND a.MessageTo = '" + MessageFrom + "') ORDER BY SentTime", Connection);
-            Connection.Open();
-
-            using (MySqlDataReader reader = Command.ExecuteReader())
+            IDataReader Reader;
+            if (TestReader == null)
             {
-                while (reader.Read())
-                {
-                    Messages.Add(new MessageUser()
-                    {
-                        Id = reader.GetInt32("Id"),
-                        SentTime = reader.GetDateTime("SentTime"),
-                        Content = reader.GetString("Content"),
-                        MessageFrom = reader.GetString("MessageFrom"),
-                        MessageTo = reader.GetString("MessageTo")
-                    });
-                }
+                Reader = MessageDataReader.GetUserMessages(MessageFrom, MessageTo);
+            }
+            else
+            {
+                Reader = TestReader;
             }
 
-            Connection.Close();
+            while (Reader.Read())
+            {
+                Messages.Add(new MessageUser()
+                {
+                    Id = (int)((UInt32)Reader["Id"]),
+                    SentTime = (DateTime)Reader["SentTime"],
+                    Content = (string)Reader["Content"],
+                    MessageFrom = (string)Reader["MessageFrom"],
+                    MessageTo = (string)Reader["MessageTo"]
+                });
+            }
+
+            Reader.Close();
 
             return Messages;
         }
@@ -258,20 +271,24 @@ namespace MessagingServer.Controllers
         {
             var Messages = new List<String>();
 
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand("SELECT DISTINCT UserName FROM (SELECT MessageTo AS 'UserName' FROM messages_user WHERE MessageFrom='" + User + "' UNION ALL SELECT MessageFrom AS 'UserName' FROM messages_user WHERE MessageTo='" + User + "') as M", Connection);
-            Connection.Open();
-
-            using (MySqlDataReader reader = Command.ExecuteReader())
+            IDataReader Reader;
+            if (TestReader == null)
             {
-                while (reader.Read())
-                {
-                    Messages.Add(reader.GetString("UserName"));
-                }
+                Reader = MessageDataReader.GetMessagedUsers(User);
             }
+            else
+            {
+                Reader = TestReader;
+            }
+
+            while (Reader.Read())
+            {
+                Messages.Add((string)Reader["UserName"]);
+            }
+
             Messages.Sort();
 
-            Connection.Close();
+            Reader.Close();
 
             return Messages;
         }
@@ -286,7 +303,7 @@ namespace MessagingServer.Controllers
         [HttpPost("doNotCallThis")]
         public void SetCustomReader(IDataReader reader)
         {
-            testReader = reader;
+            TestReader = reader;
         }
     }
 }

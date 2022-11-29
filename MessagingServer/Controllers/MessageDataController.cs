@@ -1,6 +1,9 @@
+using Google.Protobuf.WellKnownTypes;
 using MessagingServer.Data;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 
 namespace MessagingServer.Controllers
@@ -62,21 +65,16 @@ namespace MessagingServer.Controllers
         [HttpPost("sendMessage")]
         public void SendMessage(String SentTime, String Content, String MessageCategory, String MessageUser)
         {
-            MySqlConnection Connection = SqlConnection();
-            Connection.Open();
-
             String Query = "INSERT INTO messages_server (SentTime, MessageRead, Content, MessageCategory, MessageUser) VALUES (@SentTime, @MessageRead, @Content, @MessageCategory, @MessageUser)";
 
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Command.Parameters.AddWithValue("@SentTime", SentTime);
-            Command.Parameters.AddWithValue("@MessageRead", 0);
-            Command.Parameters.AddWithValue("@Content", Content);
-            Command.Parameters.AddWithValue("@MessageCategory", MessageCategory);
-            Command.Parameters.AddWithValue("@MessageUser", MessageUser);
+            List<MySqlParameter> Parameters = new List<MySqlParameter>();
+            Parameters.Add(new MySqlParameter("@SentTime", SentTime));
+            Parameters.Add(new MySqlParameter("@MessageRead", false));
+            Parameters.Add(new MySqlParameter("@Content", Content));
+            Parameters.Add(new MySqlParameter("@MessageCategory", MessageCategory));
+            Parameters.Add(new MySqlParameter("@MessageUser", MessageUser));
 
-            Command.ExecuteNonQuery();
-
-            Connection.Close();
+            ExecuteCommand(Query, Parameters);
         }
 
         // Get the messages sent to a user from server
@@ -117,17 +115,12 @@ namespace MessagingServer.Controllers
         [HttpPost("markMessageRead")]
         public void MarkMessageRead(string Id)
         {
-            MySqlConnection Connection = SqlConnection();
-            Connection.Open();
-
             String Query = "UPDATE messages_server SET MessageRead = 1 WHERE Id = @Id";
 
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Command.Parameters.AddWithValue("@Id", Id);
+            List<MySqlParameter> Parameters = new List<MySqlParameter>();
+            Parameters.Add(new MySqlParameter("@Id", Id));
 
-            Command.ExecuteNonQuery();
-
-            Connection.Close();
+            ExecuteCommand(Query, Parameters);
         }
 
         // Get all the groups
@@ -160,18 +153,13 @@ namespace MessagingServer.Controllers
         [HttpPost("addMemberToGroup")]
         public void AddMemberToGroup(String GroupName, String MemberName)
         {
-            MySqlConnection Connection = SqlConnection();
-            Connection.Open();
-
             String Query = "INSERT INTO group_members (GroupName, MemberName) VALUES (@GroupName, @MemberName)";
 
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Command.Parameters.AddWithValue("@GroupName", GroupName);
-            Command.Parameters.AddWithValue("@MemberName", MemberName);
+            List<MySqlParameter> Parameters = new List<MySqlParameter>();
+            Parameters.Add(new MySqlParameter("@GroupName", GroupName));
+            Parameters.Add(new MySqlParameter("@MemberName", MemberName));
 
-            Command.ExecuteNonQuery();
-
-            Connection.Close();
+            ExecuteCommand(Query, Parameters);
         }
 
         // Get members from a group
@@ -216,20 +204,15 @@ namespace MessagingServer.Controllers
         [HttpPost("sendUserMessage")]
         public void SendUserMessage(String SentTime, String Content, String MessageFrom, String MessageTo)
         {
-            MySqlConnection Connection = SqlConnection();
-            Connection.Open();
-
             String Query = "INSERT INTO messages_user (SentTime, Content, MessageFrom, MessageTo) VALUES (@SentTime, @Content, @MessageFrom, @MessageTo)";
 
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Command.Parameters.AddWithValue("@SentTime", SentTime);
-            Command.Parameters.AddWithValue("@Content", Content);
-            Command.Parameters.AddWithValue("@MessageFrom", MessageFrom);
-            Command.Parameters.AddWithValue("@MessageTo", MessageTo);
+            List<MySqlParameter> Parameters = new List<MySqlParameter>();
+            Parameters.Add(new MySqlParameter("@SentTime", SentTime));
+            Parameters.Add(new MySqlParameter("@Content", Content));
+            Parameters.Add(new MySqlParameter("@MessageFrom", MessageFrom));
+            Parameters.Add(new MySqlParameter("@MessageTo", MessageTo));
 
-            Command.ExecuteNonQuery();
-
-            Connection.Close();
+            ExecuteCommand(Query, Parameters);
         }
 
         // Get all messages between from a user to other user
@@ -305,5 +288,19 @@ namespace MessagingServer.Controllers
         {
             TestReader = reader;
         }
+
+        // Execute a SQL query with the given parameters
+        public static void ExecuteCommand(String Query, List<MySqlParameter> Parameters)
+        {
+            MySqlConnection Connection = SqlConnection();
+            Connection.Open();
+
+            MySqlCommand Command = new MySqlCommand(Query, Connection);
+            Command.Parameters.AddRange(Parameters.ToArray<MySqlParameter>());
+
+            Command.ExecuteNonQuery();
+            Connection.Close();
+        }
+
     }
 }

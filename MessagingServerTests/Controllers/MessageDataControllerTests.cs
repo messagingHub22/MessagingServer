@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using MessagingServer.Controllers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MessagingServer.Data;
 using System.Data;
 using Moq;
@@ -114,6 +115,60 @@ namespace MessagingServer.Controllers.Tests
             Assert.AreEqual(messages.ElementAt(0).Content, "testV2");
             Assert.AreEqual(messages.ElementAt(0).MessageCategory, "Testing");
             Assert.AreEqual(messages.ElementAt(0).MessageUser, "Tester");
+            Assert.AreEqual(messages.Count(), 1);
+        }
+
+        [TestMethod()]
+        public void MarkMessageReadTest()
+        {
+            MessageDataReader.IsTesting = true;
+
+            MessageDataController controller = new MessageDataController(null);
+            controller.SendMessage("2000-01-01", "testV2", "Testing", "Tester");
+            controller.MarkMessageRead("1"); // Id is 1 for first created message
+
+            IEnumerable<MessageData> messages = controller.GetMessagesForUser("Tester");
+
+            MessageDataReader.IsTesting = false;
+
+            Assert.IsNotNull(messages);
+            Assert.AreEqual(messages.ElementAt(0).MessageRead, true); // Verify message was marked read
+        }
+
+        [TestMethod()]
+        public void AddMemberToGroupTest()
+        {
+            MessageDataReader.IsTesting = true;
+
+            MessageDataController controller = new MessageDataController(null);
+            controller.AddMemberToGroup("testGroup", "testMember");
+
+            IEnumerable<string> members = controller.GetGroupMembers("testGroup");
+
+            MessageDataReader.IsTesting = false;
+
+            Assert.IsNotNull(members);
+            Assert.AreEqual(members.ElementAt(0), "testMember");
+            Assert.AreEqual(members.Count(), 1);
+        }
+
+        [TestMethod()]
+        public void SendUserMessageTest()
+        {
+            MessageDataReader.IsTesting = true;
+
+            MessageDataController controller = new MessageDataController(null);
+            controller.SendUserMessage("2000-01-01", "userMessageTest", "x", "y");
+
+            IEnumerable<MessageUser> messages = controller.GetUserMessages("x", "y");
+
+            MessageDataReader.IsTesting = false;
+
+            Assert.IsNotNull(messages);
+            Assert.AreEqual(messages.ElementAt(0).Id, 1);
+            Assert.AreEqual(messages.ElementAt(0).Content, "userMessageTest");
+            Assert.AreEqual(messages.ElementAt(0).MessageFrom, "x");
+            Assert.AreEqual(messages.ElementAt(0).MessageTo, "y");
             Assert.AreEqual(messages.Count(), 1);
         }
 

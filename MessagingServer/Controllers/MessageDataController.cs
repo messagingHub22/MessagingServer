@@ -40,9 +40,9 @@ namespace MessagingServer.Controllers
             {
                 Messages.Add(new MessageData()
                 {
-                    Id = (int)((UInt32)Reader["Id"]),
-                    SentTime = (DateTime)Reader["SentTime"],
-                    MessageRead = (UInt64)Reader["MessageRead"] == 1,
+                    Id = Int32.Parse(Reader["Id"].ToString()),
+                    SentTime = DateTime.Parse(Reader["SentTime"].ToString()),
+                    MessageRead = Int32.Parse(Reader["MessageRead"].ToString()) == 1,
                     Content = (string)Reader["Content"],
                     MessageCategory = (string)Reader["MessageCategory"],
                     MessageUser = (string)Reader["MessageUser"]
@@ -90,9 +90,9 @@ namespace MessagingServer.Controllers
             {
                 Messages.Add(new MessageData()
                 {
-                    Id = (int)((UInt32)Reader["Id"]),
-                    SentTime = (DateTime)Reader["SentTime"],
-                    MessageRead = (UInt64)Reader["MessageRead"] == 1,
+                    Id = Int32.Parse(Reader["Id"].ToString()),
+                    SentTime = DateTime.Parse(Reader["SentTime"].ToString()),
+                    MessageRead = Int32.Parse(Reader["MessageRead"].ToString()) == 1,
                     Content = (string)Reader["Content"],
                     MessageCategory = (string)Reader["MessageCategory"],
                     MessageUser = (string)Reader["MessageUser"]
@@ -228,8 +228,8 @@ namespace MessagingServer.Controllers
             {
                 Messages.Add(new MessageUser()
                 {
-                    Id = (int)((UInt32)Reader["Id"]),
-                    SentTime = (DateTime)Reader["SentTime"],
+                    Id = Int32.Parse(Reader["Id"].ToString()),
+                    SentTime = DateTime.Parse(Reader["SentTime"].ToString()),
                     Content = (string)Reader["Content"],
                     MessageFrom = (string)Reader["MessageFrom"],
                     MessageTo = (string)Reader["MessageTo"]

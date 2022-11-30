@@ -110,7 +110,7 @@ namespace MessagingServer.Controllers.Tests
             MessageDataReader.IsTesting = false;
 
             Assert.IsNotNull(messages);
-            Assert.AreEqual(messages.ElementAt(0).Id, 0);
+            Assert.AreEqual(messages.ElementAt(0).Id, 1);
             Assert.AreEqual(messages.ElementAt(0).Content, "testV2");
             Assert.AreEqual(messages.ElementAt(0).MessageCategory, "Testing");
             Assert.AreEqual(messages.ElementAt(0).MessageUser, "Tester");

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using MySql.Data.MySqlClient;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using System;
 using System.Data;
 
 namespace MessagingServer.Data
@@ -18,73 +18,62 @@ namespace MessagingServer.Data
         public static IDataReader GetMessages()
         {
             String Query = "SELECT * FROM messages_server ORDER BY SentTime DESC";
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Connection.Open();
-
-            MySqlDataReader reader = Command.ExecuteReader(CommandBehavior.CloseConnection);
-
-            return reader;
+            return GetDataReader(Query);
         }
 
         public static IDataReader GetMessagesForUser(String User)
         {
             String Query = "SELECT * FROM messages_server WHERE MessageUser='" + User + "' ORDER BY SentTime DESC";
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Connection.Open();
-
-            MySqlDataReader reader = Command.ExecuteReader(CommandBehavior.CloseConnection);
-
-            return reader;
+            return GetDataReader(Query);
         }
 
         public static IDataReader GetGroups()
         {
             String Query = "SELECT DISTINCT GroupName FROM group_members";
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Connection.Open();
-
-            MySqlDataReader reader = Command.ExecuteReader(CommandBehavior.CloseConnection);
-
-            return reader;
+            return GetDataReader(Query);
         }
 
         public static IDataReader GetGroupMembers(String Group)
         {
             String Query = "SELECT DISTINCT MemberName FROM group_members WHERE GroupName='" + Group + "'";
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Connection.Open();
-
-            MySqlDataReader reader = Command.ExecuteReader(CommandBehavior.CloseConnection);
-
-            return reader;
+            return GetDataReader(Query);
         }
 
         public static IDataReader GetUserMessages(String MessageFrom, String MessageTo)
         {
             String Query = "SELECT  * FROM messages_user a WHERE (a.MessageFrom = '" + MessageFrom + "' AND a.MessageTo = '" + MessageTo + "') OR (a.MessageFrom = '" + MessageTo + "' AND a.MessageTo = '" + MessageFrom + "') ORDER BY SentTime";
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Connection.Open();
-
-            MySqlDataReader reader = Command.ExecuteReader(CommandBehavior.CloseConnection);
-
-            return reader;
+            return GetDataReader(Query);
         }
 
         public static IDataReader GetMessagedUsers(String User)
         {
             String Query = "SELECT DISTINCT UserName FROM (SELECT MessageTo AS 'UserName' FROM messages_user WHERE MessageFrom='" + User + "' UNION ALL SELECT MessageFrom AS 'UserName' FROM messages_user WHERE MessageTo='" + User + "') as M";
-            MySqlConnection Connection = SqlConnection();
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Connection.Open();
+            return GetDataReader(Query);
+        }
 
-            MySqlDataReader reader = Command.ExecuteReader(CommandBehavior.CloseConnection);
+        // Return a IDataReader depending on whether testing in memory database is used or online
+        private static IDataReader GetDataReader(string Query)
+        {
+            if (IsTesting)
+            {
+                SqliteConnection Connection = SqliteConnection();
+                SqliteCommand Command = new SqliteCommand(Query, Connection);
+                Connection.Open();
 
-            return reader;
+                SqliteDataReader reader = Command.ExecuteReader(CommandBehavior.CloseConnection);
+
+                return reader;
+            }
+            else
+            {
+                MySqlConnection Connection = SqlConnection();
+                MySqlCommand Command = new MySqlCommand(Query, Connection);
+                Connection.Open();
+
+                MySqlDataReader reader = Command.ExecuteReader(CommandBehavior.CloseConnection);
+
+                return reader;
+            }
         }
 
         // Execute a SQL query with the given parameters
@@ -92,6 +81,8 @@ namespace MessagingServer.Data
         {
             if (IsTesting)
             {
+                CreateEmptyTablesForTests();
+
                 SqliteConnection Connection = SqliteConnection();
                 Connection.Open();
 
@@ -105,7 +96,6 @@ namespace MessagingServer.Data
                 Command.Parameters.AddRange(SqlParameters);
 
                 Command.ExecuteNonQuery();
-                Connection.Close();
             }
             else
             {
@@ -126,6 +116,25 @@ namespace MessagingServer.Data
             }
         }
 
+        public static void CreateEmptyTablesForTests()
+        {
+            string Query1 = "CREATE TABLE IF NOT EXISTS messages_server(Id INTEGER PRIMARY KEY, SentTime datetime, MessageRead BIT, Content varchar(8000), MessageCategory varchar(255), MessageUser varchar(255))";
+            string Query2 = "CREATE TABLE IF NOT EXISTS messages_user(Id INTEGER PRIMARY KEY, SentTime datetime, Content varchar(8000), MessageTo varchar(255), MessageFrom varchar(255))";
+            string Query3 = "CREATE TABLE IF NOT EXISTS group_members(Id INTEGER PRIMARY KEY, GroupName varchar(255), MemberName varchar(255))";
+
+            SqliteConnection Connection = SqliteConnection();
+            Connection.Open();
+
+            SqliteCommand Command = new SqliteCommand(Query1, Connection);
+            Command.ExecuteNonQuery();
+
+            SqliteCommand Command2 = new SqliteCommand(Query2, Connection);
+            Command2.ExecuteNonQuery();
+
+            SqliteCommand Command3 = new SqliteCommand(Query3, Connection);
+            Command3.ExecuteNonQuery();
+        }
+
         // Object for MySqlConnection
         public static MySqlConnection SqlConnection()
         {
@@ -135,7 +144,12 @@ namespace MessagingServer.Data
         // ONLY FOR TESTING. Object for SqliteConnection.
         public static SqliteConnection SqliteConnection()
         {
-            return new SqliteConnection("Filename=:memory:");
+            if (sqliteConnection == null)
+                sqliteConnection = new SqliteConnection("Filename=:memory:");
+
+            return sqliteConnection;
         }
+
+        private static SqliteConnection sqliteConnection = null;
     }
 }

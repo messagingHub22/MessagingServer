@@ -60,12 +60,12 @@ namespace MessagingServer.Controllers
         {
             String Query = "INSERT INTO messages_server (SentTime, MessageRead, Content, MessageCategory, MessageUser) VALUES (@SentTime, @MessageRead, @Content, @MessageCategory, @MessageUser)";
 
-            List<MySqlParameter> Parameters = new List<MySqlParameter>();
-            Parameters.Add(new MySqlParameter("@SentTime", SentTime));
-            Parameters.Add(new MySqlParameter("@MessageRead", false));
-            Parameters.Add(new MySqlParameter("@Content", Content));
-            Parameters.Add(new MySqlParameter("@MessageCategory", MessageCategory));
-            Parameters.Add(new MySqlParameter("@MessageUser", MessageUser));
+            Dictionary<string, object> Parameters = new Dictionary<string, object>();
+            Parameters.Add("@SentTime", SentTime);
+            Parameters.Add("@MessageRead", false);
+            Parameters.Add("@Content", Content);
+            Parameters.Add("@MessageCategory", MessageCategory);
+            Parameters.Add("@MessageUser", MessageUser);
 
             MessageDataReader.ExecuteCommand(Query, Parameters);
         }
@@ -110,8 +110,8 @@ namespace MessagingServer.Controllers
         {
             String Query = "UPDATE messages_server SET MessageRead = 1 WHERE Id = @Id";
 
-            List<MySqlParameter> Parameters = new List<MySqlParameter>();
-            Parameters.Add(new MySqlParameter("@Id", Id));
+            Dictionary<string, object> Parameters = new Dictionary<string, object>();
+            Parameters.Add("@Id", Id);
 
             MessageDataReader.ExecuteCommand(Query, Parameters);
         }
@@ -148,9 +148,9 @@ namespace MessagingServer.Controllers
         {
             String Query = "INSERT INTO group_members (GroupName, MemberName) VALUES (@GroupName, @MemberName)";
 
-            List<MySqlParameter> Parameters = new List<MySqlParameter>();
-            Parameters.Add(new MySqlParameter("@GroupName", GroupName));
-            Parameters.Add(new MySqlParameter("@MemberName", MemberName));
+            Dictionary<string, object> Parameters = new Dictionary<string, object>();
+            Parameters.Add("@GroupName", GroupName);
+            Parameters.Add("@MemberName", MemberName);
 
             MessageDataReader.ExecuteCommand(Query, Parameters);
         }
@@ -199,11 +199,11 @@ namespace MessagingServer.Controllers
         {
             String Query = "INSERT INTO messages_user (SentTime, Content, MessageFrom, MessageTo) VALUES (@SentTime, @Content, @MessageFrom, @MessageTo)";
 
-            List<MySqlParameter> Parameters = new List<MySqlParameter>();
-            Parameters.Add(new MySqlParameter("@SentTime", SentTime));
-            Parameters.Add(new MySqlParameter("@Content", Content));
-            Parameters.Add(new MySqlParameter("@MessageFrom", MessageFrom));
-            Parameters.Add(new MySqlParameter("@MessageTo", MessageTo));
+            Dictionary<string, object> Parameters = new Dictionary<string, object>();
+            Parameters.Add("@SentTime", SentTime);
+            Parameters.Add("@Content", Content);
+            Parameters.Add("@MessageFrom", MessageFrom);
+            Parameters.Add("@MessageTo", MessageTo);
 
             MessageDataReader.ExecuteCommand(Query, Parameters);
         }

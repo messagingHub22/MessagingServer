@@ -1,9 +1,7 @@
-﻿using MessagingServer.Controllers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MessagingServer.Data;
 using System.Data;
 using Moq;
-using Microsoft.AspNetCore.Mvc;
 
 namespace MessagingServer.Controllers.Tests
 {
@@ -97,6 +95,26 @@ namespace MessagingServer.Controllers.Tests
             Assert.IsNotNull(users);
             Assert.AreEqual(users.ElementAt(0), "string");
             Assert.AreEqual(users.Count(), 2);
+        }
+
+        [TestMethod()]
+        public void SendMessageTest()
+        {
+            MessageDataReader.IsTesting = true;
+
+            MessageDataController controller = new MessageDataController(null);
+            controller.SendMessage("2000-01-01", "testV2", "Testing", "Tester");
+
+            IEnumerable<MessageData> messages = controller.GetMessagesForUser("Tester");
+
+            MessageDataReader.IsTesting = false;
+
+            Assert.IsNotNull(messages);
+            Assert.AreEqual(messages.ElementAt(0).Id, 0);
+            Assert.AreEqual(messages.ElementAt(0).Content, "testV2");
+            Assert.AreEqual(messages.ElementAt(0).MessageCategory, "Testing");
+            Assert.AreEqual(messages.ElementAt(0).MessageUser, "Tester");
+            Assert.AreEqual(messages.Count(), 1);
         }
 
         // Mock IDataReader with message data

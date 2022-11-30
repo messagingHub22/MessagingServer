@@ -1,9 +1,6 @@
-using Google.Protobuf.WellKnownTypes;
 using MessagingServer.Data;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
-using System.Collections;
-using System.Collections.Generic;
 using System.Data;
 
 namespace MessagingServer.Controllers
@@ -14,10 +11,6 @@ namespace MessagingServer.Controllers
     {
 
         private readonly ILogger<MessageDataController> _logger;
-
-        // The Environment variable for the connection string,
-        // It contains the server, user, password, database name to connect to sql server.
-        private static string ConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
         // To indicate the reader when tests are being run. Used for mock sql reader. Null when tests are not being run
         private IDataReader TestReader = null;
@@ -74,7 +67,7 @@ namespace MessagingServer.Controllers
             Parameters.Add(new MySqlParameter("@MessageCategory", MessageCategory));
             Parameters.Add(new MySqlParameter("@MessageUser", MessageUser));
 
-            ExecuteCommand(Query, Parameters);
+            MessageDataReader.ExecuteCommand(Query, Parameters);
         }
 
         // Get the messages sent to a user from server
@@ -120,7 +113,7 @@ namespace MessagingServer.Controllers
             List<MySqlParameter> Parameters = new List<MySqlParameter>();
             Parameters.Add(new MySqlParameter("@Id", Id));
 
-            ExecuteCommand(Query, Parameters);
+            MessageDataReader.ExecuteCommand(Query, Parameters);
         }
 
         // Get all the groups
@@ -159,7 +152,7 @@ namespace MessagingServer.Controllers
             Parameters.Add(new MySqlParameter("@GroupName", GroupName));
             Parameters.Add(new MySqlParameter("@MemberName", MemberName));
 
-            ExecuteCommand(Query, Parameters);
+            MessageDataReader.ExecuteCommand(Query, Parameters);
         }
 
         // Get members from a group
@@ -212,7 +205,7 @@ namespace MessagingServer.Controllers
             Parameters.Add(new MySqlParameter("@MessageFrom", MessageFrom));
             Parameters.Add(new MySqlParameter("@MessageTo", MessageTo));
 
-            ExecuteCommand(Query, Parameters);
+            MessageDataReader.ExecuteCommand(Query, Parameters);
         }
 
         // Get all messages between from a user to other user
@@ -276,30 +269,11 @@ namespace MessagingServer.Controllers
             return Messages;
         }
 
-        // Object for MySqlConnection
-        public static MySqlConnection SqlConnection()
-        {
-            return new MySqlConnection(ConnectionString);
-        }
-
         // Method used for testing. Do not call from web. HttpPost added to remove error
         [HttpPost("doNotCallThis")]
         public void SetCustomReader(IDataReader reader)
         {
             TestReader = reader;
-        }
-
-        // Execute a SQL query with the given parameters
-        public static void ExecuteCommand(String Query, List<MySqlParameter> Parameters)
-        {
-            MySqlConnection Connection = SqlConnection();
-            Connection.Open();
-
-            MySqlCommand Command = new MySqlCommand(Query, Connection);
-            Command.Parameters.AddRange(Parameters.ToArray<MySqlParameter>());
-
-            Command.ExecuteNonQuery();
-            Connection.Close();
         }
 
     }

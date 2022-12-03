@@ -179,7 +179,7 @@ namespace MessagingServer.Controllers.Tests
 
             moq.SetupSequence(m => m.Read())
                 .Returns(true)
-                .Returns(true)
+                .Returns(true) // Second object is empty
                 .Returns(false);
 
             moq.SetupGet<object>(x => x["Id"]).Returns((UInt32)0);
@@ -199,7 +199,7 @@ namespace MessagingServer.Controllers.Tests
 
             moq.SetupSequence(m => m.Read())
                 .Returns(true)
-                .Returns(true)
+                .Returns(true) // Second object is empty
                 .Returns(false);
 
             moq.SetupGet<object>(x => x["Id"]).Returns((UInt32)0);
@@ -218,7 +218,7 @@ namespace MessagingServer.Controllers.Tests
 
             moq.SetupSequence(m => m.Read())
                 .Returns(true)
-                .Returns(true)
+                .Returns(true) // Second object is empty
                 .Returns(false);
 
             moq.SetupGet<object>(x => x[Column]).Returns("string");

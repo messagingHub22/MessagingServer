@@ -43,12 +43,12 @@ namespace MessagingServer.Hubs
             string name = Context.GetHttpContext().Request.Query["username"];
             string userMessageName = Context.GetHttpContext().Request.Query["userMessageName"];
 
-            if (name != null) // Name is null when client is server page
+            if (name != null) // name is null when client is server page
             {
                 _connections.Add(name, Context.ConnectionId);
             }
 
-            if (userMessageName != null) // Name is null when client is server page
+            if (userMessageName != null) // userMessageName is null when client is server page
             {
                 _userConnections.Add(userMessageName, Context.ConnectionId);
             }

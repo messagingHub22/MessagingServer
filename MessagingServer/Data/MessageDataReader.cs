@@ -51,7 +51,7 @@ namespace MessagingServer.Data
             return GetDataReader(Query);
         }
 
-        // Return a IDataReader depending on whether testing in memory database is used or online
+        // Return a IDataReader depending on whether testing in memory database is used or online in production
         private static IDataReader GetDataReader(string Query)
         {
             if (IsTesting)
@@ -116,7 +116,8 @@ namespace MessagingServer.Data
             }
         }
 
-        public static void CreateEmptyTablesForTests()
+        // Create empty tables in the in memory sqlite for testing. These commands are different than production MySQL
+        private static void CreateEmptyTablesForTests()
         {
             string Query1 = "CREATE TABLE IF NOT EXISTS messages_server(Id INTEGER PRIMARY KEY, SentTime datetime, MessageRead BIT, Content varchar(8000), MessageCategory varchar(255), MessageUser varchar(255))";
             string Query2 = "CREATE TABLE IF NOT EXISTS messages_user(Id INTEGER PRIMARY KEY, SentTime datetime, Content varchar(8000), MessageTo varchar(255), MessageFrom varchar(255))";
@@ -136,20 +137,20 @@ namespace MessagingServer.Data
         }
 
         // Object for MySqlConnection
-        public static MySqlConnection SqlConnection()
+        private static MySqlConnection SqlConnection()
         {
             return new MySqlConnection(ConnectionString);
         }
 
         // ONLY FOR TESTING. Object for SqliteConnection.
-        public static SqliteConnection SqliteConnection()
+        private static SqliteConnection sqliteConnection = null;
+
+        private static SqliteConnection SqliteConnection()
         {
             if (sqliteConnection == null)
                 sqliteConnection = new SqliteConnection("Filename=:memory:");
 
             return sqliteConnection;
         }
-
-        private static SqliteConnection sqliteConnection = null;
     }
 }

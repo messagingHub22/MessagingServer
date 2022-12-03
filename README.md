@@ -1,7 +1,7 @@
 # MessagingServer
 
 MessagingServer is a ASP.NET Core Web API that is used to handle requests to the server.  
-It can sends signalR requests to update messages when a new message or user messsage is created and tracks which users are connected.  
+It can sends signalR requests to update messages when a new message or user message is created and tracks which users are connected.  
 
 
 ### Main files description  
@@ -11,6 +11,7 @@ It can sends signalR requests to update messages when a new message or user mess
 **MessagingServer/Hubs/MessagingHub.cs** - It is a class that implements the signalR hub.
 **MessagingServer/Data/MessageData.cs** - It is a data class to represent a server to user message.  
 **MessagingServer/Data/MessageUser.cs** - It is a data class to represent a user to user message.  
+**MessagingServer/Data/MessageDataReader.cs** - It is a class that has the commands for the database. Contains IDataReader objects for select queries and excutecommand for executing some SQL query.
 **MessagingServerTests/Controllers/MessageDataControllerTests.cs** - It is a class for unit tests.
 
 
